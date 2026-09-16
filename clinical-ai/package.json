@@ -1,0 +1,20 @@
+{
+  "name": "@edge-ai/clinical-ai",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Deterministic clinical rule engine (red-flag/RDT/vital/pregnancy) for Edge-AI. Rules are unreviewed drafts pending clinical sign-off - see README.md.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.13",
+    "@types/node": "^20.14.10",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.5.4"
+  }
+}

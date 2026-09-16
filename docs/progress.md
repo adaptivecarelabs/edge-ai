@@ -59,11 +59,13 @@ Production deployment: Not started
 - [ ] ASR integration
 
 ### Clinical AI
-- [ ] Rule engine
-- [ ] Red-flag rules
-- [ ] RDT rules
-- [ ] Vital-sign rules
-- [ ] Pregnancy rules
+- [~] Rule engine — scaffolded in TypeScript (`clinical-ai/`), 34 passing tests; embeds directly into the future React Native app per `docs/architecture.md`
+- [~] Red-flag rules — draft set implemented (`clinical-ai/src/rules/redFlag.ts`), unreviewed
+- [~] RDT rules — draft set implemented (`clinical-ai/src/rules/rdt.ts`), unreviewed
+- [~] Vital-sign rules — draft set implemented (`clinical-ai/src/rules/vitals.ts`), adult thresholds only, unreviewed
+- [~] Pregnancy rules — draft set implemented (`clinical-ai/src/rules/pregnancy.ts`), unreviewed
+
+  All five items above are blocked from [x] by the same governance gap as Phase 1: DoD requires clinical-reviewer sign-off and a real guideline citation per rule, and no reviewer is named yet (see Phase 1 Governance, and `clinical-ai/README.md`).
 - [ ] Quantized medical LLM
 - [ ] GraphRAG pipeline
 - [ ] NCDC knowledge graph
