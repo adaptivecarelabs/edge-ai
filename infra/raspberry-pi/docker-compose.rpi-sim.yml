@@ -1,0 +1,32 @@
+# Overlay for docker-compose.yml that approximates the Raspberry Pi 4 (4GB) target:
+# arm64 platform (via QEMU on non-arm64 dev hosts) + memory/CPU ceilings + auto-restart.
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f infra/raspberry-pi/docker-compose.rpi-sim.yml up -d --build
+#   infra/raspberry-pi/smoke-test.sh
+#
+# This is a simulation, not a substitute for booting the real image on a Pi 4 —
+# see infra/raspberry-pi/README.md.
+services:
+  edge-server:
+    platform: linux/arm64
+    # QEMU-emulated (non-native-arch) build containers on Docker Desktop can't reach
+    # its internal DNS proxy, breaking `pip install`; host networking during build
+    # routes through the host's resolver instead. See README for details.
+    build:
+      network: host
+    mem_limit: 512m
+    cpus: 1.5
+    restart: unless-stopped
+
+  couchdb:
+    platform: linux/arm64
+    mem_limit: 768m
+    cpus: 1.5
+    restart: unless-stopped
+
+  redis:
+    platform: linux/arm64
+    mem_limit: 256m
+    cpus: 1.0
+    restart: unless-stopped

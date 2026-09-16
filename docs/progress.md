@@ -23,7 +23,7 @@ Production deployment: Not started
 - [x] FastAPI service scaffolded
 - [x] CouchDB configured
 - [x] Redis configured
-- [ ] Raspberry Pi edge-server image created
+- [~] Raspberry Pi edge-server image — simulated via Docker (`infra/raspberry-pi/docker-compose.rpi-sim.yml` + `smoke-test.sh`); arm64 emulation, resource limits, restart policy, and smoke test all verified end-to-end. Real Pi 4 hardware boot/provisioning still pending (see `infra/raspberry-pi/README.md`)
 
 ### Data
 - [x] Patient schema finalized
