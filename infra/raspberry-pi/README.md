@@ -40,8 +40,25 @@ thermal throttling, or the actual boot/provisioning path onto Ubuntu 22.04. Thos
 device and remain open — this only de-risks the container/service config ahead of hardware
 arriving, so Phase 1 governance/infra work isn't blocked on procurement.
 
-## Still needed once a Pi is available
+## Provisioning script (written, not yet run on real hardware)
 
-A provisioning script/image (Ansible or shell) that installs Docker on Ubuntu 22.04 and brings
-up this same stack on first boot, per the DoD in `docs/project_plan.md`: boots on target RPi
-4/4GB, services auto-start, smoke test passes.
+`provision.sh` installs Docker on a fresh Ubuntu 22.04 (arm64) Pi 4, then brings up the same
+`docker-compose.rpi-sim.yml`-overlaid stack used in the simulation above — on real hardware this
+overlay's `linux/arm64` platform matches natively (no QEMU) and the memory/CPU ceilings apply
+directly instead of only approximating them.
+
+From a checkout of this repo on the Pi:
+
+```bash
+sudo ./infra/raspberry-pi/provision.sh
+```
+
+It installs Docker (via `get.docker.com`) if missing, enables the Docker service, builds and
+starts the stack, and runs `smoke-test.sh` to confirm it's healthy. Services restart with the
+Docker daemon (`restart: unless-stopped`) rather than through a separate systemd unit, so they
+come back on reboot as long as `docker compose down` is never run.
+
+**Not yet verified:** this script has been syntax-checked (`bash -n`) but not executed — it uses
+`apt-get`/`systemctl`/`usermod`, which don't exist on the dev machine that simulated the arm64
+stack. Real Pi 4 CPU/SD-card/thermal behavior and the actual first-boot provisioning path remain
+open until it's run against real hardware.
