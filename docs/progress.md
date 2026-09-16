@@ -71,7 +71,7 @@ Production deployment: Not started
 - [ ] NCDC knowledge graph
 - [ ] WHO guideline ingestion
 - [ ] Guideline versioning
-- [ ] Safety validator
+- [~] Safety validator — scaffolded (`clinical-ai/src/safety/`), 8 structural checks (red-flag downgrade/suppression, missing escalation instruction, missing confidence statement, ungrounded LLM output, empty/unreviewed citations, unjustified CHW override) with a red-team test suite; covers only mechanically-detectable violations, not free-text content policing — see `clinical-ai/README.md`
 
 ### Extreme Edge
 - [ ] RapidPro integration

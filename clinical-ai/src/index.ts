@@ -1,6 +1,7 @@
 export * from './types';
 export { RuleEngine } from './engine';
 export { allRules, redFlagRules, rdtRules, vitalRules, pregnancyRules } from './rules';
+export * from './safety';
 
 import { RuleEngine } from './engine';
 import { allRules } from './rules';
