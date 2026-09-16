@@ -1,0 +1,37 @@
+services:
+  edge-server:
+    build: ./edge-server
+    ports:
+      - "8001:8000"
+    environment:
+      - COUCHDB_URL=http://couchdb:5984
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - couchdb
+      - redis
+    volumes:
+      - ./edge-server/app:/app/app
+
+  couchdb:
+    image: couchdb:3.3
+    ports:
+      - "5984:5984"
+    environment:
+      - COUCHDB_USER=admin
+      - COUCHDB_PASSWORD=changeme
+    volumes:
+      - couchdb-data:/opt/couchdb/data
+      - ./infra/couchdb/init.ini:/opt/couchdb/etc/default.d/init.ini
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    volumes:
+      - redis-data:/data
+      - ./infra/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+
+volumes:
+  couchdb-data:
+  redis-data:
