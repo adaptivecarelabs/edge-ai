@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://edge-ai.adaptivecarelabs.com/schemas/consent.schema.json",
+  "title": "Consent",
+  "description": "Consent record required before scanning a patient document or using patient data beyond direct care, per system_prompt.md Consent rules and PRD 4.10.",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "schema_version": { "type": "string", "const": "1.0.0" },
+    "patient_id": { "type": "string", "format": "uuid" },
+    "chw_id": { "type": "string" },
+    "purpose": {
+      "type": "string",
+      "enum": ["document_scan", "general_care", "data_sharing_analytics"]
+    },
+    "granted": { "type": "boolean" },
+    "method": {
+      "type": "string",
+      "enum": ["verbal_witnessed", "signature", "thumbprint"],
+      "description": "How consent was captured, given variable literacy levels in the field."
+    },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "retention_expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "created_at + policy retention period (default 6 years per PRD 4.10, pending governance sign-off)."
+    },
+    "revoked_at": { "type": ["string", "null"], "format": "date-time" },
+    "audit": {
+      "type": "object",
+      "properties": {
+        "created_at": { "type": "string", "format": "date-time" },
+        "created_by": { "type": "string" }
+      },
+      "required": ["created_at", "created_by"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["id", "schema_version", "patient_id", "chw_id", "purpose", "granted", "method", "timestamp", "retention_expires_at", "audit"],
+  "additionalProperties": false
+}

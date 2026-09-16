@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://edge-ai.adaptivecarelabs.com/schemas/sync-metadata.schema.json",
+  "title": "SyncMetadata",
+  "description": "Tracks replication state for one record across PouchDB (Android) <-> CouchDB (LGA edge) <-> National Cloud, including retry/backoff and conflict resolution (BRD FR-15, PRD 4.9).",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "schema_version": { "type": "string", "const": "1.0.0" },
+    "record_type": {
+      "type": "string",
+      "enum": ["patient", "encounter", "consent", "triage"]
+    },
+    "record_id": { "type": "string", "format": "uuid" },
+    "origin_device_id": { "type": "string" },
+    "origin_layer": {
+      "type": "string",
+      "enum": ["android", "ussd_sms", "lga_edge"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "syncing", "synced", "failed", "conflict"]
+    },
+    "attempts": { "type": "integer", "minimum": 0 },
+    "last_attempt_at": { "type": ["string", "null"], "format": "date-time" },
+    "next_retry_at": { "type": ["string", "null"], "format": "date-time" },
+    "backoff_seconds": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Exponential backoff interval applied before next_retry_at."
+    },
+    "checksum": {
+      "type": "string",
+      "description": "Content hash of the record at last write, used to make retries idempotent."
+    },
+    "error": {
+      "type": ["object", "null"],
+      "properties": {
+        "code": { "type": "string" },
+        "message": { "type": "string" }
+      },
+      "required": ["code", "message"],
+      "additionalProperties": false
+    },
+    "conflict": {
+      "type": ["object", "null"],
+      "properties": {
+        "detected_at": { "type": "string", "format": "date-time" },
+        "local_rev": { "type": "string" },
+        "remote_rev": { "type": "string" },
+        "resolution_strategy": {
+          "type": "string",
+          "enum": ["timestamp_priority", "source_priority", "chw_manual_review"]
+        },
+        "resolved_by": { "type": ["string", "null"] },
+        "resolved_at": { "type": ["string", "null"], "format": "date-time" },
+        "notes": { "type": ["string", "null"] }
+      },
+      "required": ["detected_at", "local_rev", "remote_rev", "resolution_strategy"],
+      "additionalProperties": false
+    },
+    "synced_at": { "type": ["string", "null"], "format": "date-time" },
+    "audit_trail": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "event": { "type": "string" },
+          "actor": { "type": "string" },
+          "at": { "type": "string", "format": "date-time" }
+        },
+        "required": ["event", "actor", "at"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["id", "schema_version", "record_type", "record_id", "origin_device_id", "origin_layer", "status", "attempts", "backoff_seconds", "checksum", "audit_trail"],
+  "additionalProperties": false
+}

@@ -9,6 +9,7 @@ android/        React Native CHW app (offline-first, PouchDB, OCR, ASR, on-devic
 edge-server/    FastAPI service for the LGA Raspberry Pi edge (CouchDB, Redis, GraphRAG, edge LLM)
 cloud/          National cloud layer (DHIS2 integration, analytics, model registry)
 infra/          Local dev environment, CouchDB/Redis config, Raspberry Pi provisioning
+schemas/        Versioned JSON Schema for patient/encounter/consent/triage/sync-metadata
 docs/           Architecture, BRD/PRD, system prompt, skills spec, project plan, progress tracker
 ```
 

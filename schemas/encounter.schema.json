@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://edge-ai.adaptivecarelabs.com/schemas/encounter.schema.json",
+  "title": "Encounter",
+  "description": "A single CHW-patient encounter: observations, any OCR-derived record digitization, and links to the resulting triage recommendation. Powers the patient history timeline (PRD 4.4/5.1, BRD FR-06).",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "schema_version": { "type": "string", "const": "1.0.0" },
+    "patient_id": { "type": "string", "format": "uuid" },
+    "facility_id": { "type": "string" },
+    "lga_id": { "type": "string" },
+    "chw_id": { "type": "string" },
+    "channel": {
+      "type": "string",
+      "enum": ["android", "ussd", "sms"]
+    },
+    "encounter_type": {
+      "type": "string",
+      "enum": ["triage", "follow_up", "referral", "record_digitization"]
+    },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "consent_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Required if this encounter includes a document scan."
+    },
+    "observations": {
+      "type": "object",
+      "description": "Structured patient observations, mirroring the triage engine's expected input (docs/skills.md).",
+      "properties": {
+        "age": { "type": ["number", "null"], "minimum": 0 },
+        "sex": { "type": "string", "enum": ["male", "female", "unknown"] },
+        "pregnant": { "type": ["boolean", "null"] },
+        "gestational_weeks": { "type": ["number", "null"], "minimum": 0, "maximum": 45 },
+        "temperature_c": { "type": ["number", "null"] },
+        "blood_pressure": {
+          "type": ["object", "null"],
+          "properties": {
+            "systolic": { "type": ["number", "null"] },
+            "diastolic": { "type": ["number", "null"] }
+          },
+          "additionalProperties": false
+        },
+        "respiratory_rate": { "type": ["number", "null"] },
+        "pulse": { "type": ["number", "null"] },
+        "symptoms": { "type": "array", "items": { "type": "string" } },
+        "rdt_results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "test_type": { "type": "string" },
+              "result": { "type": "string" }
+            },
+            "required": ["test_type", "result"],
+            "additionalProperties": false
+          }
+        },
+        "medications": { "type": "array", "items": { "type": "string" } },
+        "history": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["sex", "symptoms"],
+      "additionalProperties": false
+    },
+    "ocr_extraction": {
+      "type": ["object", "null"],
+      "description": "Present only when this encounter originated from a scanned paper record. Raw OCR/NER output is unverified until reviewed_by_chw is true - see system_prompt.md OCR rules.",
+      "properties": {
+        "raw_text": { "type": "string" },
+        "entities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string" },
+              "value": { "type": "string" },
+              "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+            },
+            "required": ["type", "value", "confidence"],
+            "additionalProperties": false
+          }
+        },
+        "reviewed_by_chw": { "type": "boolean" },
+        "reviewed_at": { "type": ["string", "null"], "format": "date-time" },
+        "source_document_deleted": { "type": "boolean" }
+      },
+      "required": ["reviewed_by_chw", "source_document_deleted"],
+      "additionalProperties": false
+    },
+    "chw_corrections": {
+      "type": "array",
+      "description": "Explicit diff of CHW edits over OCR/rule/AI output - must never be silently overwritten (system_prompt.md).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "field": { "type": "string" },
+          "original_value": {},
+          "corrected_value": {},
+          "corrected_by": { "type": "string" },
+          "corrected_at": { "type": "string", "format": "date-time" }
+        },
+        "required": ["field", "original_value", "corrected_value", "corrected_by", "corrected_at"],
+        "additionalProperties": false
+      }
+    },
+    "triage_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Reference to the triage.schema.json record produced for this encounter."
+    },
+    "referral": {
+      "type": ["object", "null"],
+      "properties": {
+        "referred": { "type": "boolean" },
+        "destination_facility_id": { "type": ["string", "null"] },
+        "reason": { "type": ["string", "null"] },
+        "status": { "type": "string", "enum": ["pending", "completed", "declined"] }
+      },
+      "required": ["referred", "status"],
+      "additionalProperties": false
+    },
+    "audit": {
+      "type": "object",
+      "properties": {
+        "created_at": { "type": "string", "format": "date-time" },
+        "created_by": { "type": "string" },
+        "updated_at": { "type": "string", "format": "date-time" },
+        "updated_by": { "type": "string" }
+      },
+      "required": ["created_at", "created_by", "updated_at", "updated_by"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["id", "schema_version", "patient_id", "facility_id", "lga_id", "chw_id", "channel", "encounter_type", "timestamp", "observations", "chw_corrections", "audit"],
+  "additionalProperties": false
+}

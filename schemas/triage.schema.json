@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://edge-ai.adaptivecarelabs.com/schemas/triage.schema.json",
+  "title": "Triage",
+  "description": "A triage recommendation produced by the hybrid rule-engine/LLM/GraphRAG pipeline, with the safety metadata required by system_prompt.md (rule 9: record model/guideline version and inference pathway for every AI-assisted recommendation; rule 10: preserve the distinction between deterministic rule output and AI-generated reasoning).",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "schema_version": { "type": "string", "const": "1.0.0" },
+    "encounter_id": { "type": "string", "format": "uuid" },
+    "patient_id": { "type": "string", "format": "uuid" },
+    "inference_pathway": {
+      "type": "string",
+      "enum": ["deterministic_rule", "hybrid_llm", "escalated_no_inference"],
+      "description": "Deterministic rules are evaluated first; the LLM is only invoked when rules don't fully resolve the case (system_prompt.md Hybrid Inference)."
+    },
+    "rule_engine_result": {
+      "type": ["object", "null"],
+      "properties": {
+        "rules_fired": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "rule_id": { "type": "string" },
+              "guideline_ref": { "type": "string" }
+            },
+            "required": ["rule_id", "guideline_ref"],
+            "additionalProperties": false
+          }
+        },
+        "red_flags": { "type": "array", "items": { "type": "string" } },
+        "rule_engine_version": { "type": "string" }
+      },
+      "required": ["rules_fired", "red_flags", "rule_engine_version"],
+      "additionalProperties": false
+    },
+    "llm_result": {
+      "type": ["object", "null"],
+      "description": "Present only when inference_pathway is hybrid_llm.",
+      "properties": {
+        "model_version": { "type": "string" },
+        "reasoning_summary": { "type": "string" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["model_version", "reasoning_summary", "confidence"],
+      "additionalProperties": false
+    },
+    "graphrag_retrieval": {
+      "type": ["object", "null"],
+      "properties": {
+        "graph_version": { "type": "string" },
+        "guideline_ids": { "type": "array", "items": { "type": "string" } },
+        "entities_retrieved": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string" },
+              "id": { "type": "string" }
+            },
+            "required": ["type", "id"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["graph_version", "guideline_ids"],
+      "additionalProperties": false
+    },
+    "output": {
+      "type": "object",
+      "description": "The Clinical Recommendation Format required by system_prompt.md.",
+      "properties": {
+        "risk_level": {
+          "type": "string",
+          "enum": ["HIGH_RISK", "MEDIUM_RISK", "LOW_RISK", "INSUFFICIENT_DATA", "ESCALATE"]
+        },
+        "immediate_action": { "type": "string" },
+        "rationale": { "type": "string" },
+        "red_flags": { "type": "array", "items": { "type": "string" } },
+        "missing_information": { "type": "array", "items": { "type": "string" } },
+        "guideline_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "source": { "type": "string" },
+              "id": { "type": "string" },
+              "version": { "type": "string" }
+            },
+            "required": ["source", "id", "version"],
+            "additionalProperties": false
+          }
+        },
+        "confidence_statement": { "type": "string" },
+        "escalation_instruction": { "type": ["string", "null"] }
+      },
+      "required": ["risk_level", "immediate_action", "rationale", "red_flags", "missing_information", "guideline_refs", "confidence_statement"],
+      "additionalProperties": false
+    },
+    "safety_validation": {
+      "type": "object",
+      "properties": {
+        "passed": { "type": "boolean" },
+        "validator_version": { "type": "string" },
+        "notes": { "type": ["string", "null"] }
+      },
+      "required": ["passed", "validator_version"],
+      "additionalProperties": false
+    },
+    "chw_review": {
+      "type": "object",
+      "description": "Human-in-the-loop review (FR-13). A CHW/clinician override never silently replaces the original recommendation - both are retained.",
+      "properties": {
+        "reviewed": { "type": "boolean" },
+        "reviewed_by": { "type": ["string", "null"] },
+        "reviewed_at": { "type": ["string", "null"], "format": "date-time" },
+        "override": {
+          "type": ["object", "null"],
+          "properties": {
+            "risk_level": {
+              "type": "string",
+              "enum": ["HIGH_RISK", "MEDIUM_RISK", "LOW_RISK", "INSUFFICIENT_DATA", "ESCALATE"]
+            },
+            "reason": { "type": "string" }
+          },
+          "required": ["risk_level", "reason"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["reviewed"],
+      "additionalProperties": false
+    },
+    "audit": {
+      "type": "object",
+      "properties": {
+        "created_at": { "type": "string", "format": "date-time" },
+        "created_by": { "type": "string" }
+      },
+      "required": ["created_at", "created_by"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["id", "schema_version", "encounter_id", "patient_id", "inference_pathway", "output", "safety_validation", "chw_review", "audit"],
+  "additionalProperties": false
+}
